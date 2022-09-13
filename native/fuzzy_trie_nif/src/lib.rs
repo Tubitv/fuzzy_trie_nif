@@ -1,13 +1,13 @@
 use fuzzy_trie::FuzzyTrie;
 use rustler::resource::ResourceArc;
 use rustler::{Atom, Env, Term};
-use std::convert::TryInto;
-use std::sync::Mutex;
-use supported_term::SupportedTerm;
+use std::convert::{From, TryInto};
+use std::sync::RwLock;
+use supported_term::{ParseSupportedError, SupportedTerm};
 
 mod supported_term;
 
-pub struct FuzzyTrieResource(Mutex<FuzzyTrie<SupportedTerm>>);
+pub struct FuzzyTrieResource(RwLock<FuzzyTrie<SupportedTerm>>);
 
 type FuzzyTrieArc = ResourceArc<FuzzyTrieResource>;
 
@@ -20,6 +20,12 @@ mod atoms {
         // Error Atoms
         lock_fail,
         unsupported_type,
+    }
+}
+
+impl From<ParseSupportedError> for Atom {
+    fn from(_: ParseSupportedError) -> Self {
+        atoms::unsupported_type()
     }
 }
 
@@ -37,7 +43,7 @@ fn on_load(env: Env, _info: Term) -> bool {
 
 #[rustler::nif]
 pub fn new(distance: u8, damerau: bool) -> (Atom, FuzzyTrieArc) {
-    let resource = ResourceArc::new(FuzzyTrieResource(Mutex::new(FuzzyTrie::new(
+    let resource = ResourceArc::new(FuzzyTrieResource(RwLock::new(FuzzyTrie::new(
         distance, damerau,
     ))));
 
@@ -46,42 +52,37 @@ pub fn new(distance: u8, damerau: bool) -> (Atom, FuzzyTrieArc) {
 
 #[rustler::nif]
 pub fn insert(resource: FuzzyTrieArc, key: String, term: Term) -> Result<Atom, Atom> {
-    let item: SupportedTerm = match term.try_into() {
-        Err(_) => return Err(atoms::unsupported_type()),
-        Ok(term) => term,
-    };
+    let item: SupportedTerm = term.try_into()?;
 
-    let mut trie = match resource.0.try_lock() {
-        Err(_) => return Err(atoms::lock_fail()),
-        Ok(guard) => guard,
-    };
-
-    trie.insert(&key).insert(item);
-    Ok(atoms::ok())
+    match resource.0.try_write() {
+        Err(_) => Err(atoms::lock_fail()),
+        Ok(mut trie) => {
+            trie.insert(&key).insert(item);
+            Ok(atoms::ok())
+        }
+    }
 }
 
 #[rustler::nif]
 pub fn len(resource: FuzzyTrieArc) -> Result<usize, Atom> {
-    let trie = match resource.0.try_lock() {
-        Err(_) => return Err(atoms::lock_fail()),
-        Ok(guard) => guard,
-    };
-
-    Ok(trie.len())
+    match resource.0.try_read() {
+        Err(_) => Err(atoms::lock_fail()),
+        Ok(trie) => Ok(trie.len()),
+    }
 }
 
 #[rustler::nif]
 pub fn fuzzy_search(resource: FuzzyTrieArc, key: String) -> Result<Vec<SupportedTerm>, Atom> {
-    let trie = match resource.0.try_lock() {
-        Err(_) => return Err(atoms::lock_fail()),
-        Ok(guard) => guard,
-    };
+    match resource.0.try_read() {
+        Err(_) => Err(atoms::lock_fail()),
+        Ok(trie) => {
+            let mut list: Vec<&SupportedTerm> = Vec::new();
+            trie.fuzzy_search(&key, &mut list);
 
-    let mut list: Vec<&SupportedTerm> = Vec::new();
-    trie.fuzzy_search(&key, &mut list);
-
-    let result = list.iter().map(|&t| t.clone()).collect();
-    Ok(result)
+            let result = list.iter().map(|&t| t.clone()).collect();
+            Ok(result)
+        }
+    }
 }
 
 #[rustler::nif]
@@ -89,14 +90,14 @@ pub fn prefix_fuzzy_search(
     resource: FuzzyTrieArc,
     key: String,
 ) -> Result<Vec<SupportedTerm>, Atom> {
-    let trie = match resource.0.try_lock() {
-        Err(_) => return Err(atoms::lock_fail()),
-        Ok(guard) => guard,
-    };
+    match resource.0.try_read() {
+        Err(_) => Err(atoms::lock_fail()),
+        Ok(trie) => {
+            let mut list: Vec<&SupportedTerm> = Vec::new();
+            trie.prefix_fuzzy_search(&key, &mut list);
 
-    let mut list: Vec<&SupportedTerm> = Vec::new();
-    trie.prefix_fuzzy_search(&key, &mut list);
-
-    let result = list.iter().map(|&t| t.clone()).collect();
-    Ok(result)
+            let result = list.iter().map(|&t| t.clone()).collect();
+            Ok(result)
+        }
+    }
 }

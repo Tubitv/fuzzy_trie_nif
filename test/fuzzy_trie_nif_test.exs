@@ -16,6 +16,11 @@ defmodule FuzzyTrieNifTest do
              [[2, "3"]]
   end
 
+  test "get error when inserting unsupported type" do
+    trie = FuzzyTrie.new(1, true)
+    assert FuzzyTrie.insert(trie, "something", self()) == {:error, :unsupported_type}
+  end
+
   test "damerau config should work" do
     trie =
       FuzzyTrie.new(1, true)

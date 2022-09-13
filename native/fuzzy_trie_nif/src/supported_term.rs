@@ -19,6 +19,10 @@ pub enum SupportedTerm {
     Bitstring(String),
 }
 
+pub enum ParseSupportedError {
+    UnsupportedType,
+}
+
 impl Ord for SupportedTerm {
     fn cmp(&self, other: &SupportedTerm) -> Ordering {
         match self {
@@ -171,18 +175,18 @@ impl Encoder for SupportedTerm {
 }
 
 impl<'a> TryFrom<Term<'a>> for SupportedTerm {
-    type Error = ();
+    type Error = ParseSupportedError;
 
     fn try_from(term: Term) -> Result<Self, Self::Error> {
         if term.is_number() {
             match term.decode() {
                 Ok(i) => Ok(SupportedTerm::Integer(i)),
-                Err(_) => Err(()),
+                Err(_) => Err(ParseSupportedError::UnsupportedType),
             }
         } else if term.is_atom() {
             match term.atom_to_string() {
                 Ok(a) => Ok(SupportedTerm::Atom(a)),
-                Err(_) => Err(()),
+                Err(_) => Err(ParseSupportedError::UnsupportedType),
             }
         } else if term.is_tuple() {
             match get_tuple(term) {
@@ -190,10 +194,10 @@ impl<'a> TryFrom<Term<'a>> for SupportedTerm {
                     if let Ok(inner_terms) = t.into_iter().map(|i: Term| i.try_into()).collect() {
                         Ok(SupportedTerm::Tuple(inner_terms))
                     } else {
-                        Err(())
+                        Err(ParseSupportedError::UnsupportedType)
                     }
                 }
-                Err(_) => Err(()),
+                Err(_) => Err(ParseSupportedError::UnsupportedType),
             }
         } else if term.is_list() {
             match term.decode::<Vec<Term>>() {
@@ -201,18 +205,18 @@ impl<'a> TryFrom<Term<'a>> for SupportedTerm {
                     if let Ok(inner_terms) = l.into_iter().map(|i: Term| i.try_into()).collect() {
                         Ok(SupportedTerm::List(inner_terms))
                     } else {
-                        Err(())
+                        Err(ParseSupportedError::UnsupportedType)
                     }
                 }
-                Err(_) => Err(()),
+                Err(_) => Err(ParseSupportedError::UnsupportedType),
             }
         } else if term.is_binary() {
             match term.decode() {
                 Ok(b) => Ok(SupportedTerm::Bitstring(b)),
-                Err(_) => Err(()),
+                Err(_) => Err(ParseSupportedError::UnsupportedType),
             }
         } else {
-            Err(())
+            Err(ParseSupportedError::UnsupportedType)
         }
     }
 }
