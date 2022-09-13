@@ -22,6 +22,7 @@ defmodule FuzzyTrieNif.MixProject do
   defp deps do
     [
       {:rustler, "~> 0.25.0"},
+      {:typed_struct, "~> 0.3.0"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:benchee, "~> 1.0", only: :dev}

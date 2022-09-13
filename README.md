@@ -31,6 +31,16 @@ FuzzyTrie.prefix_fuzzy_search(trie, "s0me") # [0, 1, 2, 3]
 FuzzyTrie.fuzzy_search(trie, "s0me") # []
 FuzzyTrie.fuzzy_search(trie, "s0mething") # [0, 1]
 ```
+The fuzzy trie can also be built by `FuzzyTrie.Builder`
+```elixir
+{:ok, trie} =
+  FuzzyTrie.Builder.new(distance: 1)
+  |> FuzzyTrie.Builder.insert("something", 0)
+  |> FuzzyTrie.Builder.insert("something", 1)
+  |> FuzzyTrie.Builder.insert("something else", 2)
+  |> FuzzyTrie.Builder.insert("somewhere", 3)
+  |> FuzzyTrie.Builder.build()
+```
 
 ## Benchmark
 ```
