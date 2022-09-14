@@ -16,6 +16,22 @@ defmodule FuzzyTrieNifTest do
              [[2, "3"]]
   end
 
+  test "special character" do
+    trie =
+      FuzzyTrie.new(1, true)
+      |> FuzzyTrie.insert("ladrón que", 0)
+      |> FuzzyTrie.insert("ladron que", 1)
+      |> FuzzyTrie.insert("américa narco ", 2)
+      |> FuzzyTrie.insert("临兵斗者皆阵列前行", 3)
+
+    assert FuzzyTrie.prefix_fuzzy_search(trie, "ladron") == [0, 1]
+    assert FuzzyTrie.prefix_fuzzy_search(trie, "ledró") == [0]
+    assert FuzzyTrie.prefix_fuzzy_search(trie, "amero") == []
+    assert FuzzyTrie.prefix_fuzzy_search(trie, "灵镖斗者") == []
+    assert FuzzyTrie.prefix_fuzzy_search(trie, "临兵斗者") == [3]
+    assert FuzzyTrie.prefix_fuzzy_search(trie, "临兵斗者皆阵列在前") == [3]
+  end
+
   test "get error when inserting unsupported type" do
     trie = FuzzyTrie.new(1, true)
     assert FuzzyTrie.insert(trie, "something", self()) == {:error, :unsupported_type}
