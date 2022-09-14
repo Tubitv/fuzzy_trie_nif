@@ -54,7 +54,7 @@ pub fn new(distance: u8, damerau: bool) -> (Atom, FuzzyTrieArc) {
 pub fn insert(resource: FuzzyTrieArc, key: String, term: Term) -> Result<Atom, Atom> {
     let item: SupportedTerm = term.try_into()?;
 
-    match resource.0.try_write() {
+    match resource.0.write() {
         Err(_) => Err(atoms::lock_fail()),
         Ok(mut trie) => {
             trie.insert(&key).insert(item);
@@ -65,7 +65,7 @@ pub fn insert(resource: FuzzyTrieArc, key: String, term: Term) -> Result<Atom, A
 
 #[rustler::nif]
 pub fn len(resource: FuzzyTrieArc) -> Result<usize, Atom> {
-    match resource.0.try_read() {
+    match resource.0.read() {
         Err(_) => Err(atoms::lock_fail()),
         Ok(trie) => Ok(trie.len()),
     }
@@ -73,7 +73,7 @@ pub fn len(resource: FuzzyTrieArc) -> Result<usize, Atom> {
 
 #[rustler::nif]
 pub fn fuzzy_search(resource: FuzzyTrieArc, key: String) -> Result<Vec<SupportedTerm>, Atom> {
-    match resource.0.try_read() {
+    match resource.0.read() {
         Err(_) => Err(atoms::lock_fail()),
         Ok(trie) => {
             let mut list: Vec<&SupportedTerm> = Vec::new();
@@ -90,7 +90,7 @@ pub fn prefix_fuzzy_search(
     resource: FuzzyTrieArc,
     key: String,
 ) -> Result<Vec<SupportedTerm>, Atom> {
-    match resource.0.try_read() {
+    match resource.0.read() {
         Err(_) => Err(atoms::lock_fail()),
         Ok(trie) => {
             let mut list: Vec<&SupportedTerm> = Vec::new();
