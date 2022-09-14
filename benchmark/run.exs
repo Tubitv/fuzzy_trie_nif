@@ -26,6 +26,7 @@ Benchee.run(
     "fuzzy_search" => fn trie -> FuzzyTrie.fuzzy_search(trie, random_string.()) end,
     "prefix_fuzzy_search" => fn trie -> FuzzyTrie.prefix_fuzzy_search(trie, random_string.()) end
   },
+  parallel: 10,
   inputs: %{
     "1 distance, damerau, 100 items" => get_trie.(1, true, 100),
     "2 distance, damerau, 100 items" => get_trie.(2, true, 100),

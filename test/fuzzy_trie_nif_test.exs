@@ -51,10 +51,14 @@ defmodule FuzzyTrieNifTest do
       _ = FuzzyTrie.insert(trie, "something " <> random_string.(), i)
     end)
 
-    for _ <- 1..200 do
-      list = FuzzyTrie.prefix_fuzzy_search(trie, "s0me")
-      assert is_list(list)
-      assert length(list) == 200
-    end
+    1..200
+    |> Enum.map(fn _ ->
+      Task.async(FuzzyTrie, :prefix_fuzzy_search, [trie, "s0me"])
+    end)
+    |> Task.await_many()
+    |> Enum.map(fn res ->
+      assert is_list(res)
+      assert length(res) == 200
+    end)
   end
 end
