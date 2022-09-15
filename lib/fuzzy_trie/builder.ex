@@ -48,6 +48,10 @@ defmodule FuzzyTrie.Builder do
   end
 
   @spec insert(__MODULE__.t(), String.t(), Types.supported_term()) :: __MODULE__.t()
+  def insert(%__MODULE__{inner_data: [], unique: true} = builder, key, value) do
+    %__MODULE__{builder | inner_data: __MODULE__.InnerData.add(%{}, key, value)}
+  end
+
   def insert(%__MODULE__{inner_data: inner_data} = builder, key, value) do
     %__MODULE__{builder | inner_data: __MODULE__.InnerData.add(inner_data, key, value)}
   end
