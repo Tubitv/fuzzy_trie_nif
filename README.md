@@ -34,7 +34,7 @@ FuzzyTrie.fuzzy_search(trie, "s0mething") # [0, 1]
 The fuzzy trie can also be built by `FuzzyTrie.Builder`
 ```elixir
 {:ok, trie} =
-  FuzzyTrie.Builder.new(distance: 1)
+  FuzzyTrie.Builder.new!(distance: 1)
   |> FuzzyTrie.Builder.insert("something", 0)
   |> FuzzyTrie.Builder.insert("something", 1)
   |> FuzzyTrie.Builder.insert("something else", 2)

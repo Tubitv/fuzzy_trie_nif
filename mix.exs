@@ -4,6 +4,7 @@ defmodule FuzzyTrieNif.MixProject do
   def project do
     [
       app: :fuzzy_trie_nif,
+      compilers: [:domo_compiler] ++ Mix.compilers(),
       version: "0.1.0",
       elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
@@ -22,6 +23,7 @@ defmodule FuzzyTrieNif.MixProject do
   defp deps do
     [
       {:rustler, "~> 0.25.0"},
+      {:domo, "~> 1.5"},
       {:typed_struct, "~> 0.3.0"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
