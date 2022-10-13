@@ -54,7 +54,9 @@ defmodule FuzzyTrieNif.MixProject do
       organization: "tubitv",
       files: [
         "lib",
-        "native",
+        "native/fuzzy_trie_nif/.cargo",
+        "native/fuzzy_trie_nif/src",
+        "native/fuzzy_trie_nif/Cargo*",
         "checksum-*.exs",
         "mix.exs",
         "README.md",
