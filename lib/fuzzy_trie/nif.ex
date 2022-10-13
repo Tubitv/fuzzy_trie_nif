@@ -1,7 +1,16 @@
 defmodule FuzzyTrie.Nif do
   @moduledoc false
 
-  use Rustler, otp_app: :fuzzy_trie_nif, crate: "fuzzy_trie_nif"
+  mix_config = Mix.Project.config()
+  version = mix_config[:version]
+  github_url = mix_config[:package][:links]["GitHub"]
+
+  use RustlerPrecompiled,
+    otp_app: :fuzzy_trie_nif,
+    crate: :fuzzy_trie_nif,
+    base_url: "#{github_url}/releases/download/v#{version}",
+    force_build: System.get_env("FUZZY_TRIE_FORCE_BUILD") in ["1", "true"],
+    version: version
 
   alias FuzzyTrie.Types
 
