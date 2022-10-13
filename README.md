@@ -18,6 +18,10 @@ Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_do
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at <https://hexdocs.pm/fuzzy_trie_nif>.
 
+## Forcing compilation
+
+By default **you don't need Rust installed** because the lib will try to download a precompiled NIF file. In case you want to force compilation set the `FUZZY_TRIE_FORCE_BUILD` environment variable to `true` or `1`.
+
 ## Usage
 ```elixir
 trie =
@@ -167,3 +171,12 @@ Comparison:
 prefix_fuzzy_search        279.04
 fuzzy_search               270.45 - 1.03x slower +0.114 ms
 ```
+
+## License
+
+Licensed under either of
+
+ * Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+ * MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+
+at your option.

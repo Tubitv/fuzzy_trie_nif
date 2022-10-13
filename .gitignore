@@ -24,3 +24,5 @@ fuzzy_trie_nif-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+checksum-*.exs
